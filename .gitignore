@@ -1,0 +1,11 @@
+# nested app repo - tracked separately
+custom-app/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Shopify CLI
+.shopify/
