@@ -36,9 +36,9 @@
       "settings": {
         "speed": 5,
         "section_width": "full-width",
-        "background_color": "#2DCFAD",
+        "background_color": "#2dcfad",
         "divider_width": 1,
-        "divider_color": "#2DCFAD",
+        "divider_color": "#2dcfad",
         "padding-block-start": 15,
         "padding-block-end": 15
       }
@@ -82,9 +82,9 @@
         }
       },
       "settings": {
-        "logo_position": "left",
+        "logo_position": "center",
         "menu_position": "center",
-        "menu_row": "top",
+        "menu_row": "bottom",
         "customer_account_menu": "customer-account-main-menu",
         "show_search": true,
         "search_position": "right",
