@@ -1,0 +1,544 @@
+{% comment %}
+  Custom 4-Column Footer Section
+  - Column 1: Logo & Company Info
+  - Column 2: Header Menu links (or selected menu)
+  - Column 3: Custom navigation links
+  - Column 4: Newsletter & Privacy Policy Links
+  - Bottom Bar: Copyright notice with modern border divider
+{% endcomment %}
+
+{%- style -%}
+  .custom-footer {
+    background-color: {{ section.settings.background_color | default: 'var(--color-background)' }};
+    color: {{ section.settings.text_color | default: 'var(--color-foreground)' }};
+    border-top: 1px solid {{ section.settings.border_color | default: 'var(--color-border, #e8e8e8)' }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    font-family: var(--font-body--family, inherit);
+  }
+
+  .custom-footer__inner {
+    max-width: var(--page-width, 1200px);
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .custom-footer__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .custom-footer__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .custom-footer__grid {
+      grid-template-columns: 2fr 1fr 1fr 2fr;
+    }
+  }
+
+  .custom-footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .custom-footer__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: {{ section.settings.title_color | default: 'var(--color-foreground)' }};
+  }
+
+  .custom-footer__logo-link {
+    display: inline-block;
+    max-width: 100%;
+    transition: opacity 0.3s ease;
+  }
+
+  .custom-footer__logo-link:hover {
+    opacity: 0.8;
+  }
+
+  .custom-footer__logo {
+    display: block;
+    height: auto;
+  }
+
+  .custom-footer__logo-fallback {
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .custom-footer__company-info {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: {{ section.settings.text_color_muted | default: 'var(--color-foreground-muted, #666666)' }};
+  }
+
+  .custom-footer__menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .custom-footer__menu-item a {
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: {{ section.settings.link_color | default: 'var(--color-foreground-muted, #666666)' }};
+    transition: color 0.3s ease, padding-left 0.3s ease;
+    display: inline-block;
+  }
+
+  .custom-footer__menu-item a:hover {
+    color: {{ section.settings.link_hover_color | default: 'var(--color-accent, #000000)' }};
+    padding-left: 4px;
+  }
+
+  .custom-footer__newsletter-desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+    color: {{ section.settings.text_color_muted | default: 'var(--color-foreground-muted, #666666)' }};
+  }
+
+  .custom-footer__newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .custom-footer__newsletter-input-wrapper {
+    display: flex;
+    border: 1px solid {{ section.settings.border_color | default: 'var(--color-border, #ccc)' }};
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--color-background, #fff);
+  }
+
+  .custom-footer__newsletter-input {
+    flex-grow: 1;
+    border: none;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    background: transparent;
+    color: inherit;
+    outline: none;
+  }
+
+  .custom-footer__newsletter-button {
+    background: {{ section.settings.btn_bg_color | default: 'var(--color-foreground, #000)' }};
+    color: {{ section.settings.btn_text_color | default: 'var(--color-background, #fff)' }};
+    border: none;
+    padding: 0 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .custom-footer__newsletter-button:hover {
+    background: {{ section.settings.btn_hover_bg_color | default: '#333' }};
+  }
+
+  .custom-footer__policies {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+  }
+
+  .custom-footer__policies-item a {
+    text-decoration: none;
+    font-size: 0.8rem;
+    color: {{ section.settings.link_color | default: 'var(--color-foreground-muted, #666666)' }};
+    transition: color 0.3s ease;
+  }
+
+  .custom-footer__policies-item a:hover {
+    color: {{ section.settings.link_hover_color | default: 'var(--color-accent, #000)' }};
+  }
+
+  .custom-footer__bottom {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid {{ section.settings.border_color | default: 'var(--color-border, #e8e8e8)' }};
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .custom-footer__bottom {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+    }
+  }
+
+  .custom-footer__copyright {
+    font-size: 0.8rem;
+    color: {{ section.settings.text_color_muted | default: 'var(--color-foreground-muted, #666666)' }};
+    margin: 0;
+  }
+{%- endstyle -%}
+
+<footer class="custom-footer">
+  <div class="custom-footer__inner">
+    <div class="custom-footer__grid">
+      {% comment %} Column 1: Logo & Company Info {% endcomment %}
+      <div class="custom-footer__col">
+        {%- if section.settings.logo != blank -%}
+          <span>test if condition</span>
+        {%- else -%}
+          <span>test else condition</span>
+        {%- endif -%}
+
+        {%- if section.settings.logo != blank -%}
+          <a href="{{ routes.root_url }}" class="custom-footer__logo-link">
+            {%- assign logo_alt = section.settings.logo.alt | default: shop.name | escape -%}
+            {%- assign logo_height = section.settings.logo_width | divided_by: section.settings.logo.aspect_ratio -%}
+            {{
+              section.settings.logo
+              | image_url: width: section.settings.logo_width
+              | image_tag:
+                class: 'custom-footer__logo',
+                widths: section.setting.logo_width,
+                height: logo_height,
+                width: section.settings.logo_width,
+                alt: logo_alt
+            }}
+          </a>
+        {%- else -%}
+          <a href="{{ routes.root_url }}" class="custom-footer__logo-fallback">
+            {{ shop.name }}
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.company_info != blank -%}
+          <div class="custom-footer__company-info">
+            {{ section.settings.company_info }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {% comment %} Column 2: Header Navigation Menu {% endcomment %}
+      <div class="custom-footer__col">
+        <h3 class="custom-footer__title">
+          {{ section.settings.menu_1_title | escape }}
+        </h3>
+        {%- if section.settings.menu_1 != blank -%}
+          <ul class="custom-footer__menu">
+            {%- for link in section.settings.menu_1.links -%}
+              <li class="custom-footer__menu-item">
+                <a href="{{ link.url }}">{{ link.title }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      {% comment %} Column 3: Custom Navigation Menu {% endcomment %}
+      <div class="custom-footer__col">
+        <h3 class="custom-footer__title">
+          {{ section.settings.menu_2_title | escape }}
+        </h3>
+        {%- if section.settings.menu_2 != blank -%}
+          <ul class="custom-footer__menu">
+            {%- for link in section.settings.menu_2.links -%}
+              <li class="custom-footer__menu-item">
+                <a href="{{ link.url }}">{{ link.title }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      {% comment %} Column 4: Newsletter & Privacy Policy Links {% endcomment %}
+      <div class="custom-footer__col">
+        <h3 class="custom-footer__title">
+          {{ section.settings.newsletter_title | escape }}
+        </h3>
+        {%- if section.settings.newsletter_desc != blank -%}
+          <p class="custom-footer__newsletter-desc">
+            {{ section.settings.newsletter_desc }}
+          </p>
+        {%- endif -%}
+
+        {%- form 'customer', class: 'custom-footer__newsletter-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="custom-footer__newsletter-input-wrapper">
+            <input
+              id="NewsletterEmail-{{ section.id }}"
+              type="email"
+              name="contact[email]"
+              class="custom-footer__newsletter-input"
+              value="{{ form.email }}"
+              aria-required="true"
+              autocorrect="off"
+              autocapitalize="off"
+              autocomplete="email"
+              placeholder="{{ 'blocks.email_signup.placeholder' | t | default: 'Enter email address' }}"
+              required
+            >
+            <button
+              type="submit"
+              class="custom-footer__newsletter-button"
+              name="commit"
+              id="Subscribe-{{ section.id }}"
+              aria-label="Subscribe"
+            >
+              Subscribe
+            </button>
+          </div>
+          {%- if form.errors -%}
+            <span class="form__message error" style="color: red; font-size: 0.8rem;">
+              {{- form.errors.translated_fields.email | capitalize }}
+              {{ form.errors.messages.email -}}
+            </span>
+          {%- endif -%}
+          {%- if form.posted_successfully? -%}
+            <span class="form__message success" style="color: green; font-size: 0.8rem;">
+              {{- 'blocks.email_signup.success' | t | default: 'Thanks for subscribing!' -}}
+            </span>
+          {%- endif -%}
+        {%- endform -%}
+
+        {% comment %} Policies List {% endcomment %}
+        {%- if section.settings.show_policies -%}
+          <ul class="custom-footer__policies">
+            {%- if section.settings.policy_menu != blank -%}
+              {%- for link in section.settings.policy_menu.links -%}
+                <li class="custom-footer__policies-item">
+                  <a href="{{ link.url }}">{{ link.title }}</a>
+                </li>
+              {%- endfor -%}
+            {%- else -%}
+              {%- for policy in shop.policies -%}
+                {%- if policy != blank -%}
+                  <li class="custom-footer__policies-item">
+                    <a href="{{ policy.url }}">{{ policy.title }}</a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          </ul>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {% comment %} Bottom Copyright Row {% endcomment %}
+    <div class="custom-footer__bottom">
+      <p class="custom-footer__copyright">
+        &copy; {{ 'now' | date: '%Y' }}, {{ shop.name | link_to: routes.root_url }}.
+        {{ section.settings.copyright_text }}
+      </p>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Custom 4-Column Footer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Column 1: Branding & Info"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo Image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "default": 120,
+      "unit": "px",
+      "label": "Logo width"
+    },
+    {
+      "type": "richtext",
+      "id": "company_info",
+      "label": "Company Information",
+      "default": "<p>Add details about your company history, values, or contact details.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Column 2: Header Navigation Links"
+    },
+    {
+      "type": "text",
+      "id": "menu_1_title",
+      "label": "Column Title",
+      "default": "Navigation"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_1",
+      "label": "Select Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "header",
+      "content": "Column 3: Custom Navigation Links"
+    },
+    {
+      "type": "text",
+      "id": "menu_2_title",
+      "label": "Column Title",
+      "default": "Quick Links"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_2",
+      "label": "Select Menu",
+      "default": "footer"
+    },
+    {
+      "type": "header",
+      "content": "Column 4: Newsletter & Policies"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_title",
+      "label": "Newsletter Heading",
+      "default": "Subscribe"
+    },
+    {
+      "type": "textarea",
+      "id": "newsletter_desc",
+      "label": "Newsletter Description",
+      "default": "Subscribe to our newsletter to receive the latest updates, promotions, and news."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_policies",
+      "label": "Show Policy Links",
+      "default": true
+    },
+    {
+      "type": "link_list",
+      "id": "policy_menu",
+      "label": "Policy Menu override",
+      "info": "Leave empty to dynamically list shop policies"
+    },
+    {
+      "type": "header",
+      "content": "Bottom Copyright Content"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright Text",
+      "default": "All rights reserved."
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "default": 60,
+      "unit": "px",
+      "label": "Top Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "default": 40,
+      "unit": "px",
+      "label": "Bottom Padding"
+    },
+    {
+      "type": "header",
+      "content": "Colors Override"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Footer Background Color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Footer Text Color"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color"
+    },
+    {
+      "type": "color",
+      "id": "text_color_muted",
+      "label": "Secondary Text Color"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link Color"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link Hover Color"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border/Line Color"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Button Background Color"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "Button Text Color"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_bg_color",
+      "label": "Button Hover Background"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom 4-Column Footer"
+    }
+  ]
+}
+{% endschema %}

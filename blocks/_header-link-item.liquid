@@ -1,0 +1,90 @@
+{%- liquid
+  assign label = block.settings.label | default: 'Link'
+  assign url = block.settings.link | default: '#'
+  assign icon_position = block.settings.icon_position | default: 'left'
+  assign icon_image = block.settings.icon_image
+  assign icon_svg = block.settings.icon_svg
+-%}
+
+{%- if label != blank -%}
+  <a 
+    href="{{ url }}" 
+    class="header-links__item" 
+    {{ block.shopify_attributes }}
+  >
+    {%- capture block_icon -%}
+      {%- if icon_svg != blank -%}
+        <span class="header-links__icon-svg">
+          {{ icon_svg }}
+        </span>
+      {%- elsif icon_image != blank -%}
+        <span class="header-links__icon-image">
+          {{ icon_image | image_url: width: 80 | image_tag: alt: label, loading: 'lazy' }}
+        </span>
+      {%- endif -%}
+    {%- endcapture -%}
+
+    {%- if icon_position == 'left' -%}
+      {{ block_icon }}
+    {%- endif -%}
+
+    <span class="header-links__label">{{ label | escape }}</span>
+
+    {%- if icon_position == 'right' -%}
+      {{ block_icon }}
+    {%- endif -%}
+  </a>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Header Link Item",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Link Label",
+      "default": "Link text"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link URL"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_image",
+      "label": "Icon Image",
+      "info": "Upload PNG, JPG, or SVG"
+    },
+    {
+      "type": "textarea",
+      "id": "icon_svg",
+      "label": "Icon SVG Markup",
+      "info": "Paste custom inline raw SVG code here (e.g. <svg>...</svg>)"
+    },
+    {
+      "type": "select",
+      "id": "icon_position",
+      "label": "Icon Position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left of text"
+        },
+        {
+          "value": "right",
+          "label": "Right of text"
+        }
+      ],
+      "default": "left"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header Link Item"
+    }
+  ]
+}
+{% endschema %}

@@ -125,19 +125,17 @@
         data-template="{{ template }}"
       >
         {{ content_for_layout }}
-
-        {% comment %} Simple Liquid program to sum two values {% endcomment %}
       </main>
 
       <footer>
-        {% sections 'footer-group' %}
+        {% section 'footer-custom' %}
       </footer>
     </div>
 
     {% render 'cart-drawer', render_wrapper: true %}
     {% render 'theme-drawer' %}
 
-    {% render 'search-modal' %}
+    {% comment %} {% render 'search-modal' %} {% endcomment %}
 
     {% if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add-modal' %}
