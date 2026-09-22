@@ -1,0 +1,1388 @@
+{% liquid
+  assign section_id = section.id
+  assign layout_mode = section.settings.layout_mode | default: 'columns'
+  assign desktop_columns = section.settings.columns_desktop | default: 3
+  assign tablet_columns = section.settings.columns_tablet | default: 2
+  assign mobile_columns = section.settings.columns_mobile | default: 1
+  assign gap_size = section.settings.gap_size | default: 20
+  assign corner_radius = section.settings.corner_radius | default: 12
+  assign overlay_style = section.settings.overlay_style | default: 'gradient'
+  assign overlay_opacity = section.settings.overlay_opacity | default: 75
+  assign overlay_display = section.settings.overlay_display | default: 'hover_desktop_always_mobile'
+  assign hover_zoom = section.settings.hover_zoom
+
+  if section.settings.background_color != blank
+    render 'contrast-override', background_color: section.settings.background_color, section_id: section_id
+  endif
+%}
+
+<div class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section_id }}{% endif %}"></div>
+
+<div
+  id="MasonryGallery-{{ section_id }}"
+  class="
+    section
+    section--{{ section.settings.section_width | default: 'page-width' }}
+    section-masonry-gallery
+    {% if section.settings.background_color != blank %}color-custom-{{ section_id }}{% endif %}
+    spacing-style
+  "
+  style="
+    {% render 'spacing-style', settings: section.settings %}
+    --masonry-cols-desktop: {{ desktop_columns }};
+    --masonry-cols-tablet: {{ tablet_columns }};
+    --masonry-cols-mobile: {{ mobile_columns }};
+    --masonry-gap: {{ gap_size }}px;
+    --masonry-radius: {{ corner_radius }}px;
+    --section-overlay-color: {{ section.settings.overlay_color | default: '#000000' }};
+    --section-overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }};
+    --section-text-color: {{ section.settings.text_color | default: '#ffffff' }};
+  "
+  data-testid="masonry-gallery"
+>
+  {%- if section.settings.heading != blank or section.settings.subheading != blank or section.settings.eyebrow != blank or section.settings.header_button_label != blank -%}
+    <div class="masonry-gallery__header masonry-gallery__header--{{ section.settings.header_alignment | default: 'center' }}">
+      <div class="masonry-gallery__header-content">
+        {%- if section.settings.eyebrow != blank -%}
+          <span class="masonry-gallery__eyebrow">{{ section.settings.eyebrow | escape }}</span>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <h2 class="masonry-gallery__heading {{ section.settings.heading_size | default: 'h2' }}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.subheading != blank -%}
+          <div class="masonry-gallery__subheading rte">
+            {{ section.settings.subheading }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.header_button_label != blank and section.settings.header_button_link != blank -%}
+        <div class="masonry-gallery__header-cta">
+          <a
+            href="{{ section.settings.header_button_link }}"
+            class="masonry-gallery__cta-btn masonry-gallery__cta-btn--{{ section.settings.header_button_style | default: 'outline' }}"
+            {% if section.settings.header_button_open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+          >
+            <span>{{ section.settings.header_button_label | escape }}</span>
+            <svg class="masonry-gallery__cta-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.33334 8H12.6667M12.6667 8L8.66668 4M12.6667 8L8.66668 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div
+    class="
+      masonry-gallery__container
+      masonry-gallery--{{ layout_mode }}
+      masonry-gallery--overlay-{{ overlay_display }}
+      {% if hover_zoom %}masonry-gallery--zoom{% endif %}
+    "
+  >
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign block_id = block.id
+        assign item_aspect_ratio = block.settings.image_aspect_ratio | default: 'adapt'
+        assign has_link = false
+        if block.settings.link != blank
+          assign has_link = true
+        endif
+
+        assign ratio_value = 'auto'
+        case item_aspect_ratio
+          when 'portrait_4_5'
+            assign ratio_value = '4 / 5'
+          when 'portrait_3_4'
+            assign ratio_value = '3 / 4'
+          when 'tall_9_16'
+            assign ratio_value = '9 / 16'
+          when 'square_1_1'
+            assign ratio_value = '1 / 1'
+          when 'landscape_16_9'
+            assign ratio_value = '16 / 9'
+          when 'landscape_4_3'
+            assign ratio_value = '4 / 3'
+          when 'wide_2_1'
+            assign ratio_value = '2 / 1'
+          when 'adapt'
+            if block.settings.image != blank
+              assign ratio_value = block.settings.image.aspect_ratio
+            else
+              assign ratio_value = '4 / 5'
+            endif
+        endcase
+
+        assign block_overlay_color = block.settings.overlay_color
+        assign block_overlay_opacity = block.settings.overlay_opacity
+        assign block_text_color = block.settings.text_color
+        assign block_alignment = block.settings.content_alignment | default: 'inherit'
+
+        assign placeholder_index = forloop.index | modulo: 6 | plus: 1
+        assign placeholder_name = 'collection-apparel-' | append: placeholder_index
+      -%}
+
+      <div
+        id="MasonryItem-{{ block_id }}"
+        class="
+          masonry-gallery__item
+          masonry-gallery__item--col-{{ block.settings.grid_col_span | default: '1' }}
+          masonry-gallery__item--row-{{ block.settings.grid_row_span | default: '1' }}
+          masonry-gallery__item--align-{{ block_alignment }}
+        "
+        style="
+          --item-aspect-ratio: {{ ratio_value }};
+          {% if block_overlay_color != blank %}--item-overlay-color: {{ block_overlay_color }};{% endif %}
+          {% if block_overlay_opacity != blank and block_overlay_opacity != 0 %}--item-overlay-opacity: {{ block_overlay_opacity | divided_by: 100.0 }};{% endif %}
+          {% if block_text_color != blank %}--item-text-color: {{ block_text_color }};{% endif %}
+        "
+        {{ block.shopify_attributes }}
+      >
+        {%- if has_link -%}
+          <a
+            href="{{ block.settings.link }}"
+            class="masonry-gallery__card-link"
+            aria-label="{{ block.settings.title | default: 'Gallery Image' | strip_html | escape }}"
+            {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+          >
+        {%- else -%}
+          <div class="masonry-gallery__card-inner">
+        {%- endif -%}
+
+          <div class="masonry-gallery__media-wrap">
+            {%- if block.settings.image != blank -%}
+              <picture>
+                {%- if block.settings.mobile_image != blank -%}
+                  <source
+                    media="(max-width: 749px)"
+                    srcset="
+                      {{ block.settings.mobile_image | image_url: width: 400 }} 400w,
+                      {{ block.settings.mobile_image | image_url: width: 600 }} 600w,
+                      {{ block.settings.mobile_image | image_url: width: 800 }} 800w
+                    "
+                    sizes="(max-width: 749px) 100vw, 50vw"
+                  >
+                {%- endif -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 1800
+                  | image_tag:
+                    loading: 'lazy',
+                    widths: '320, 480, 640, 800, 1000, 1200, 1600, 1800',
+                    sizes: '(min-width: 1200px) calc(100vw / var(--masonry-cols-desktop, 3)), (min-width: 750px) 50vw, 100vw',
+                    class: 'masonry-gallery__image',
+                    alt: block.settings.image.alt | default: block.settings.title | default: 'Gallery Image'
+                }}
+              </picture>
+            {%- else -%}
+              <div class="masonry-gallery__placeholder">
+                {{ placeholder_name | placeholder_svg_tag: 'masonry-gallery__placeholder-svg' }}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="masonry-gallery__overlay masonry-gallery__overlay--{{ overlay_style }}">
+            <div class="masonry-gallery__overlay-content">
+              {%- if block.settings.tag != blank -%}
+                <span class="masonry-gallery__badge">
+                  {{ block.settings.tag | escape }}
+                </span>
+              {%- endif -%}
+
+              {%- if block.settings.title != blank -%}
+                <h3 class="masonry-gallery__title {{ block.settings.heading_size | default: 'h4' }}">
+                  {{ block.settings.title }}
+                </h3>
+              {%- endif -%}
+
+              {%- if block.settings.subheading != blank -%}
+                <p class="masonry-gallery__item-subheading">
+                  {{ block.settings.subheading | escape }}
+                </p>
+              {%- endif -%}
+
+              {%- if block.settings.description != blank -%}
+                <div class="masonry-gallery__description rte">
+                  {{ block.settings.description }}
+                </div>
+              {%- endif -%}
+
+              {%- if block.settings.button_label != blank -%}
+                <span class="masonry-gallery__btn masonry-gallery__btn--{{ block.settings.button_style | default: 'glass' }}">
+                  <span>{{ block.settings.button_label | escape }}</span>
+                  <svg class="masonry-gallery__btn-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M2.91666 7H11.0833M11.0833 7L7.58333 3.5M11.0833 7L7.58333 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              {%- elsif has_link -%}
+                <span class="masonry-gallery__link-indicator" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                    <polyline points="7 7 17 7 17 17"></polyline>
+                  </svg>
+                </span>
+              {%- endif -%}
+            </div>
+          </div>
+
+        {%- if has_link -%}
+          </a>
+        {%- else -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  </div>
+
+  {%- if section.settings.footer_button_label != blank and section.settings.footer_button_link != blank -%}
+    <div class="masonry-gallery__footer masonry-gallery__footer--{{ section.settings.footer_alignment | default: 'center' }}">
+      <a
+        href="{{ section.settings.footer_button_link }}"
+        class="masonry-gallery__cta-btn masonry-gallery__cta-btn--{{ section.settings.footer_button_style | default: 'solid' }}"
+        {% if section.settings.footer_button_open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+      >
+        <span>{{ section.settings.footer_button_label | escape }}</span>
+        <svg class="masonry-gallery__cta-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.33334 8H12.6667M12.6667 8L8.66668 4M12.6667 8L8.66668 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  /* ==========================================================================
+     Masonry Gallery Section Styles
+     ========================================================================== */
+
+  .section-masonry-gallery {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Header Styles */
+  .masonry-gallery__header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: clamp(24px, 4vw, 48px);
+    gap: 16px;
+  }
+
+  .masonry-gallery__header--left {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .masonry-gallery__header--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .masonry-gallery__header--right {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .masonry-gallery__header--split {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  @media (max-width: 749px) {
+    .masonry-gallery__header--split {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  .masonry-gallery__header-content {
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .masonry-gallery__eyebrow {
+    display: inline-block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.75;
+  }
+
+  .masonry-gallery__heading {
+    margin: 0;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .masonry-gallery__subheading {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  /* Header & Footer CTA Button */
+  .masonry-gallery__cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 9999px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+  }
+
+  .masonry-gallery__cta-btn--solid {
+    background: currentColor;
+    color: var(--color-background, #fff);
+  }
+  .masonry-gallery__cta-btn--solid span,
+  .masonry-gallery__cta-btn--solid svg {
+    color: var(--color-background, #fff);
+  }
+  .masonry-gallery__cta-btn--solid:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+
+  .masonry-gallery__cta-btn--outline {
+    background: transparent;
+    border: 1.5px solid currentColor;
+    color: inherit;
+  }
+  .masonry-gallery__cta-btn--outline:hover {
+    background: currentColor;
+    transform: translateY(-2px);
+  }
+  .masonry-gallery__cta-btn--outline:hover span,
+  .masonry-gallery__cta-btn--outline:hover svg {
+    filter: invert(1);
+  }
+
+  .masonry-gallery__cta-arrow {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .masonry-gallery__cta-btn:hover .masonry-gallery__cta-arrow {
+    transform: translateX(4px);
+  }
+
+  /* Footer Section */
+  .masonry-gallery__footer {
+    display: flex;
+    margin-top: clamp(28px, 4vw, 56px);
+  }
+  .masonry-gallery__footer--center { justify-content: center; }
+  .masonry-gallery__footer--left { justify-content: flex-start; }
+  .masonry-gallery__footer--right { justify-content: flex-end; }
+
+  /* ==========================================================================
+     Masonry Layout Engine
+     ========================================================================== */
+
+  /* Mode 1: CSS Multi-Column Masonry (Pinterest Style) */
+  .masonry-gallery--columns {
+    column-count: var(--masonry-cols-desktop, 3);
+    column-gap: var(--masonry-gap, 20px);
+    width: 100%;
+  }
+
+  .masonry-gallery--columns .masonry-gallery__item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    margin-bottom: var(--masonry-gap, 20px);
+    display: block;
+    width: 100%;
+  }
+
+  /* Mode 2: Dynamic CSS Grid (Mosaic / Bento Grid) */
+  .masonry-gallery--grid {
+    display: grid;
+    grid-template-columns: repeat(var(--masonry-cols-desktop, 3), minmax(0, 1fr));
+    gap: var(--masonry-gap, 20px);
+    width: 100%;
+    grid-auto-flow: dense;
+  }
+
+  .masonry-gallery--grid .masonry-gallery__item--col-2 {
+    grid-column: span 2;
+  }
+
+  .masonry-gallery--grid .masonry-gallery__item--row-2 {
+    grid-row: span 2;
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 990px) {
+    .masonry-gallery--columns {
+      column-count: var(--masonry-cols-tablet, 2);
+    }
+    .masonry-gallery--grid {
+      grid-template-columns: repeat(var(--masonry-cols-tablet, 2), minmax(0, 1fr));
+    }
+    .masonry-gallery--grid .masonry-gallery__item--col-2 {
+      grid-column: span min(2, var(--masonry-cols-tablet, 2));
+    }
+  }
+
+  @media (max-width: 749px) {
+    .masonry-gallery--columns {
+      column-count: var(--masonry-cols-mobile, 1);
+      column-gap: max(10px, calc(var(--masonry-gap) * 0.65));
+    }
+    .masonry-gallery--columns .masonry-gallery__item {
+      margin-bottom: max(10px, calc(var(--masonry-gap) * 0.65));
+    }
+    .masonry-gallery--grid {
+      grid-template-columns: repeat(var(--masonry-cols-mobile, 1), minmax(0, 1fr));
+      gap: max(10px, calc(var(--masonry-gap) * 0.65));
+    }
+    .masonry-gallery--grid .masonry-gallery__item--col-2 {
+      grid-column: span 1;
+    }
+  }
+
+  /* ==========================================================================
+     Gallery Card Item
+     ========================================================================== */
+
+  .masonry-gallery__item {
+    position: relative;
+    border-radius: var(--masonry-radius, 12px);
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.04);
+    isolation: isolate;
+  }
+
+  .masonry-gallery__card-link,
+  .masonry-gallery__card-inner {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .masonry-gallery__card-link:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 4px;
+  }
+
+  /* Media Container */
+  .masonry-gallery__media-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: var(--item-aspect-ratio, auto);
+    overflow: hidden;
+  }
+
+  .masonry-gallery__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+    will-change: transform;
+  }
+
+  /* Ken Burns Zoom on Hover */
+  .masonry-gallery--zoom .masonry-gallery__item:hover .masonry-gallery__image,
+  .masonry-gallery--zoom .masonry-gallery__item:focus-within .masonry-gallery__image {
+    transform: scale(1.07);
+  }
+
+  /* Placeholder Image */
+  .masonry-gallery__placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+  }
+
+  .masonry-gallery__placeholder-svg {
+    width: 100%;
+    height: 100%;
+    max-height: 480px;
+    object-fit: cover;
+    opacity: 0.8;
+  }
+
+  /* ==========================================================================
+     Overlay Layer & Styles
+     ========================================================================== */
+
+  .masonry-gallery__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(16px, 3vw, 32px);
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 0.4s ease;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Custom alignments */
+  .masonry-gallery__item--align-inherit .masonry-gallery__overlay,
+  .masonry-gallery__item--align-bottom-left .masonry-gallery__overlay {
+    justify-content: flex-end;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .masonry-gallery__item--align-bottom-center .masonry-gallery__overlay {
+    justify-content: flex-end;
+    align-items: center;
+    text-align: center;
+  }
+
+  .masonry-gallery__item--align-center .masonry-gallery__overlay {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .masonry-gallery__item--align-top-left .masonry-gallery__overlay {
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  /* Overlay Background Styles */
+  .masonry-gallery__overlay--gradient {
+    background: linear-gradient(
+      to top,
+      var(--item-overlay-color, var(--section-overlay-color)) 0%,
+      rgba(0, 0, 0, 0.4) 45%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  .masonry-gallery__overlay--solid {
+    background: var(--item-overlay-color, var(--section-overlay-color));
+  }
+
+  .masonry-gallery__overlay--glassmorphism {
+    background: var(--item-overlay-color, var(--section-overlay-color));
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+  }
+
+  /* Overlay Display Modes */
+  .masonry-gallery--overlay-hover_only .masonry-gallery__overlay {
+    opacity: 0;
+  }
+  .masonry-gallery--overlay-hover_only .masonry-gallery__item:hover .masonry-gallery__overlay,
+  .masonry-gallery--overlay-hover_only .masonry-gallery__item:focus-within .masonry-gallery__overlay {
+    opacity: var(--item-overlay-opacity, var(--section-overlay-opacity));
+  }
+
+  .masonry-gallery--overlay-always_visible .masonry-gallery__overlay {
+    opacity: var(--item-overlay-opacity, var(--section-overlay-opacity));
+  }
+
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__overlay {
+    opacity: 0;
+  }
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__item:hover .masonry-gallery__overlay,
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__item:focus-within .masonry-gallery__overlay {
+    opacity: var(--item-overlay-opacity, var(--section-overlay-opacity));
+  }
+
+  @media (max-width: 749px) {
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__overlay {
+      opacity: var(--item-overlay-opacity, var(--section-overlay-opacity));
+    }
+  }
+
+  @media (hover: none) {
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__overlay {
+      opacity: var(--item-overlay-opacity, var(--section-overlay-opacity));
+    }
+  }
+
+  /* Overlay Content Container */
+  .masonry-gallery__overlay-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    color: var(--item-text-color, var(--section-text-color));
+    z-index: 3;
+  }
+
+  .masonry-gallery__item--align-bottom-center .masonry-gallery__overlay-content,
+  .masonry-gallery__item--align-center .masonry-gallery__overlay-content {
+    align-items: center;
+  }
+
+  /* Badge / Tag */
+  .masonry-gallery__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    width: fit-content;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Item Title */
+  .masonry-gallery__title {
+    margin: 0;
+    color: inherit;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .masonry-gallery__item-subheading {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.9;
+    line-height: 1.4;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .masonry-gallery__description {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    max-width: 480px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .masonry-gallery__description p {
+    margin: 0;
+  }
+
+  /* Item Action Button */
+  .masonry-gallery__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    width: fit-content;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+
+  .masonry-gallery__btn--glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: inherit;
+  }
+
+  .masonry-gallery__btn--solid {
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid #ffffff;
+  }
+
+  .masonry-gallery__btn--outline {
+    background: transparent;
+    border: 1.5px solid currentColor;
+    color: inherit;
+  }
+
+  .masonry-gallery__btn--link {
+    background: transparent;
+    padding: 4px 0;
+    border-radius: 0;
+    border-bottom: 1.5px solid currentColor;
+    color: inherit;
+  }
+
+  .masonry-gallery__btn-arrow {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .masonry-gallery__item:hover .masonry-gallery__btn-arrow {
+    transform: translateX(3px);
+  }
+
+  /* Link indicator icon */
+  .masonry-gallery__link-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    margin-top: 4px;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+  }
+
+  .masonry-gallery__item:hover .masonry-gallery__link-indicator {
+    transform: scale(1.1) rotate(-5deg);
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  /* ==========================================================================
+     Hover Micro-Animations (Staggered Reveal)
+     ========================================================================== */
+
+  .masonry-gallery--overlay-hover_only .masonry-gallery__badge,
+  .masonry-gallery--overlay-hover_only .masonry-gallery__title,
+  .masonry-gallery--overlay-hover_only .masonry-gallery__item-subheading,
+  .masonry-gallery--overlay-hover_only .masonry-gallery__description,
+  .masonry-gallery--overlay-hover_only .masonry-gallery__btn,
+  .masonry-gallery--overlay-hover_only .masonry-gallery__link-indicator,
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__badge,
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__title,
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__item-subheading,
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__description,
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__btn,
+  .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__link-indicator {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .masonry-gallery__item:hover .masonry-gallery__badge,
+  .masonry-gallery__item:focus-within .masonry-gallery__badge {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.05s;
+  }
+
+  .masonry-gallery__item:hover .masonry-gallery__title,
+  .masonry-gallery__item:focus-within .masonry-gallery__title {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.1s;
+  }
+
+  .masonry-gallery__item:hover .masonry-gallery__item-subheading,
+  .masonry-gallery__item:focus-within .masonry-gallery__item-subheading {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.14s;
+  }
+
+  .masonry-gallery__item:hover .masonry-gallery__description,
+  .masonry-gallery__item:focus-within .masonry-gallery__description {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.18s;
+  }
+
+  .masonry-gallery__item:hover .masonry-gallery__btn,
+  .masonry-gallery__item:focus-within .masonry-gallery__btn,
+  .masonry-gallery__item:hover .masonry-gallery__link-indicator,
+  .masonry-gallery__item:focus-within .masonry-gallery__link-indicator {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.22s;
+  }
+
+  @media (max-width: 749px) {
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__badge,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__title,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__item-subheading,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__description,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__btn,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__link-indicator {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (hover: none) {
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__badge,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__title,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__item-subheading,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__description,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__btn,
+    .masonry-gallery--overlay-hover_desktop_always_mobile .masonry-gallery__link-indicator {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Masonry Gallery",
+  "tag": "section",
+  "class": "section-masonry-gallery-wrapper",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header & Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow / Subtitle",
+      "default": "Curated Gallery"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Explore Our Visual Stories"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h3", "label": "Small" },
+        { "value": "h2", "label": "Medium" },
+        { "value": "h1", "label": "Large" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Description",
+      "default": "<p>Discover inspiration, latest styles, and stories behind our craftsmanship.</p>"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Header alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" },
+        { "value": "split", "label": "Split (Heading Left, Button Right)" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "text",
+      "id": "header_button_label",
+      "label": "Header button label",
+      "default": "Shop The Collection"
+    },
+    {
+      "type": "url",
+      "id": "header_button_link",
+      "label": "Header button link"
+    },
+    {
+      "type": "select",
+      "id": "header_button_style",
+      "label": "Header button style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "outline", "label": "Outline" }
+      ],
+      "default": "outline"
+    },
+    {
+      "type": "checkbox",
+      "id": "header_button_open_new_tab",
+      "label": "Open header link in new tab",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Masonry Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_mode",
+      "label": "Layout mode",
+      "options": [
+        { "value": "columns", "label": "Pinterest Multi-Column (Natural Heights)" },
+        { "value": "grid", "label": "Mosaic Bento Grid (Span Options)" }
+      ],
+      "default": "columns"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Tablet columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Mobile columns",
+      "options": [
+        { "value": "1", "label": "1 Column" },
+        { "value": "2", "label": "2 Columns" }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "range",
+      "id": "gap_size",
+      "label": "Gap between images",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Image corner radius",
+      "min": 0,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "header",
+      "content": "Hover Overlay & Styling"
+    },
+    {
+      "type": "select",
+      "id": "overlay_style",
+      "label": "Overlay style",
+      "options": [
+        { "value": "gradient", "label": "Dark Fade Gradient" },
+        { "value": "solid", "label": "Solid Color" },
+        { "value": "glassmorphism", "label": "Glassmorphism (Frosted Blur)" }
+      ],
+      "default": "gradient"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Default overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Default overlay opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Default overlay text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "overlay_display",
+      "label": "Overlay display behavior",
+      "options": [
+        { "value": "hover_desktop_always_mobile", "label": "Hover on desktop, always visible on mobile" },
+        { "value": "hover_only", "label": "Hover only (all devices)" },
+        { "value": "always_visible", "label": "Always visible" }
+      ],
+      "default": "hover_desktop_always_mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "hover_zoom",
+      "label": "Enable image zoom on hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Footer Link / Button"
+    },
+    {
+      "type": "text",
+      "id": "footer_button_label",
+      "label": "Footer button label",
+      "default": "View All Looks"
+    },
+    {
+      "type": "url",
+      "id": "footer_button_link",
+      "label": "Footer button link"
+    },
+    {
+      "type": "select",
+      "id": "footer_button_style",
+      "label": "Footer button style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "outline", "label": "Outline" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "select",
+      "id": "footer_alignment",
+      "label": "Footer button alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "footer_button_open_new_tab",
+      "label": "Open footer link in new tab",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing & Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "gallery_image",
+      "name": "Gallery Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile Image (Optional)"
+        },
+        {
+          "type": "select",
+          "id": "image_aspect_ratio",
+          "label": "Image aspect ratio",
+          "options": [
+            { "value": "adapt", "label": "Auto / Adapt (Natural Image Height)" },
+            { "value": "portrait_4_5", "label": "Portrait (4:5)" },
+            { "value": "portrait_3_4", "label": "Portrait (3:4)" },
+            { "value": "tall_9_16", "label": "Tall (9:16)" },
+            { "value": "square_1_1", "label": "Square (1:1)" },
+            { "value": "landscape_16_9", "label": "Landscape (16:9)" },
+            { "value": "landscape_4_3", "label": "Landscape (4:3)" },
+            { "value": "wide_2_1", "label": "Wide Panorama (2:1)" }
+          ],
+          "default": "adapt"
+        },
+        {
+          "type": "header",
+          "content": "Grid Spanning (For Grid Mode)"
+        },
+        {
+          "type": "select",
+          "id": "grid_col_span",
+          "label": "Column span",
+          "options": [
+            { "value": "1", "label": "1 Column" },
+            { "value": "2", "label": "2 Columns" }
+          ],
+          "default": "1"
+        },
+        {
+          "type": "select",
+          "id": "grid_row_span",
+          "label": "Row span",
+          "options": [
+            { "value": "1", "label": "1 Row" },
+            { "value": "2", "label": "2 Rows" }
+          ],
+          "default": "1"
+        },
+        {
+          "type": "header",
+          "content": "Text & Overlay Content"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Badge / Tag",
+          "default": "Featured"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "title",
+          "label": "Title",
+          "default": "Signature Style"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Title size",
+          "options": [
+            { "value": "h5", "label": "Small" },
+            { "value": "h4", "label": "Medium" },
+            { "value": "h3", "label": "Large" }
+          ],
+          "default": "h4"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subtitle",
+          "default": "Summer 2026 Collection"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Look"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            { "value": "glass", "label": "Glassmorphism" },
+            { "value": "solid", "label": "Solid White" },
+            { "value": "outline", "label": "Outline" },
+            { "value": "link", "label": "Underline Link" }
+          ],
+          "default": "glass"
+        },
+        {
+          "type": "header",
+          "content": "Card Link"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Overlay Overrides"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Content alignment",
+          "options": [
+            { "value": "inherit", "label": "Inherit (Bottom Left)" },
+            { "value": "bottom-left", "label": "Bottom Left" },
+            { "value": "bottom-center", "label": "Bottom Center" },
+            { "value": "center", "label": "Center" },
+            { "value": "top-left", "label": "Top Left" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Custom overlay color"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Custom overlay opacity",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 0
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Custom text color"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Masonry Gallery",
+      "category": "Storytelling",
+      "settings": {
+        "eyebrow": "Visual Inspiration",
+        "heading": "Curated Masonry Gallery",
+        "subheading": "<p>A showcase of our favourite moments, editorial looks, and design details.</p>",
+        "layout_mode": "columns",
+        "columns_desktop": 3,
+        "columns_tablet": 2,
+        "columns_mobile": "1",
+        "gap_size": 20,
+        "corner_radius": 16,
+        "overlay_style": "gradient",
+        "overlay_opacity": 80,
+        "hover_zoom": true,
+        "header_button_label": "Explore All",
+        "header_button_link": "shopify://collections/all",
+        "footer_button_label": "View More Styles",
+        "footer_button_link": "shopify://collections/all"
+      },
+      "blocks": [
+        {
+          "type": "gallery_image",
+          "settings": {
+            "tag": "Look 01",
+            "title": "Minimalist Streetwear",
+            "subheading": "Edition 2026",
+            "image_aspect_ratio": "portrait_3_4",
+            "button_label": "Shop Look",
+            "link": "shopify://collections/all"
+          }
+        },
+        {
+          "type": "gallery_image",
+          "settings": {
+            "tag": "New In",
+            "title": "Architectural Silhouettes",
+            "subheading": "Premium Outerwear",
+            "image_aspect_ratio": "tall_9_16",
+            "button_label": "Discover",
+            "link": "shopify://collections/all"
+          }
+        },
+        {
+          "type": "gallery_image",
+          "settings": {
+            "tag": "Trending",
+            "title": "Warm Terracotta Tones",
+            "subheading": "Artisan Crafted",
+            "image_aspect_ratio": "square_1_1",
+            "button_label": "Shop Now",
+            "link": "shopify://collections/all"
+          }
+        },
+        {
+          "type": "gallery_image",
+          "settings": {
+            "tag": "Essential",
+            "title": "Modern Tailoring",
+            "subheading": "Clean lines & effortless drape",
+            "image_aspect_ratio": "portrait_4_5",
+            "button_label": "View Details",
+            "link": "shopify://collections/all"
+          }
+        },
+        {
+          "type": "gallery_image",
+          "settings": {
+            "tag": "Lookbook",
+            "title": "Atmospheric Textures",
+            "subheading": "Sustainable Linens",
+            "image_aspect_ratio": "landscape_4_3",
+            "button_label": "Explore",
+            "link": "shopify://collections/all"
+          }
+        },
+        {
+          "type": "gallery_image",
+          "settings": {
+            "tag": "Featured",
+            "title": "Signature Accessories",
+            "subheading": "Handcrafted Leather",
+            "image_aspect_ratio": "portrait_3_4",
+            "button_label": "Shop Look",
+            "link": "shopify://collections/all"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

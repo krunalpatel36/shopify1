@@ -1,0 +1,273 @@
+{%- liquid
+  assign bg_color = block.settings.background_color | default: 'transparent'
+  assign text_color = block.settings.text_color | default: 'inherit'
+  assign hover_color = block.settings.hover_color | default: 'inherit'
+  assign alignment = block.settings.alignment | default: 'center'
+  assign gap = block.settings.gap | default: 24
+  assign stack_mobile = block.settings.stack_mobile
+
+  assign font_size = block.settings.font_size | default: 14
+  assign font_size_mobile = block.settings.font_size_mobile | default: 13
+  assign icon_size = block.settings.icon_size | default: 18
+  assign icon_size_mobile = block.settings.icon_size_mobile | default: 16
+-%}
+
+<div 
+  class="header-links-container header-links-container-{{ block.id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="header-links__wrapper">
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% style %}
+  .header-links-container-{{ block.id }} {
+    --bg-color: {{ bg_color }};
+    --text-color: {{ text_color }};
+    --hover-color: {{ hover_color }};
+    --alignment: {{ alignment }};
+    --gap: {{ gap }}px;
+    --font-size-mobile: {{ font_size_mobile }}px;
+    --font-size-desktop: {{ font_size }}px;
+    --icon-size-mobile: {{ icon_size_mobile }}px;
+    --icon-size-desktop: {{ icon_size }}px;
+
+    background-color: var(--bg-color);
+    width: 100%;
+    display: flex;
+    justify-content: var(--alignment);
+  }
+
+  .header-links-container-{{ block.id }} .header-links__wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap);
+    justify-content: var(--alignment);
+  }
+
+  /* Style for links inside this block */
+  .header-links-container-{{ block.id }} .header-links__item {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-color);
+    gap: 8px;
+    font-size: var(--font-size-mobile);
+    transition: color 0.25s ease, opacity 0.25s ease;
+    cursor: pointer;
+  }
+
+  .header-links-container-{{ block.id }} .header-links__item:hover {
+    color: var(--hover-color);
+  }
+
+  .header-links-container-{{ block.id }} .header-links__icon-svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size-mobile);
+    height: var(--icon-size-mobile);
+    transition: color 0.25s ease;
+  }
+
+  .header-links-container-{{ block.id }} .header-links__icon-svg svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .header-links-container-{{ block.id }} .header-links__icon-image {
+    width: var(--icon-size-mobile);
+    height: var(--icon-size-mobile);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-links-container-{{ block.id }} .header-links__icon-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  @media screen and (min-width: 750px) {
+    .header-links-container-{{ block.id }} .header-links__item {
+      font-size: var(--font-size-desktop);
+    }
+    .header-links-container-{{ block.id }} .header-links__icon-svg {
+      width: var(--icon-size-desktop);
+      height: var(--icon-size-desktop);
+    }
+    .header-links-container-{{ block.id }} .header-links__icon-image {
+      width: var(--icon-size-desktop);
+      height: var(--icon-size-desktop);
+    }
+  }
+
+  /* Mobile stacking option */
+  @media screen and (max-width: 749px) {
+    {% if stack_mobile %}
+      .header-links-container-{{ block.id }} .header-links__wrapper {
+        flex-direction: column;
+        align-items: {% if alignment == 'flex-start' %}flex-start{% elsif alignment == 'flex-end' %}flex-end{% else %}center{% endif %};
+        gap: 12px;
+      }
+    {% endif %}
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Header links",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_header-link-item"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Horizontal Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        },
+        {
+          "value": "space-between",
+          "label": "Space Between"
+        },
+        {
+          "value": "space-around",
+          "label": "Space Around"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between Links",
+      "min": 8,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "checkbox",
+      "id": "stack_mobile",
+      "label": "Stack vertically on mobile",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Typography & Sizes"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size (Desktop)",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Font Size (Mobile)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon Size (Desktop)",
+      "min": 12,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "icon_size_mobile",
+      "label": "Icon Size (Mobile)",
+      "min": 10,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Link Text & Icon Color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "hover_color",
+      "label": "Hover Color",
+      "default": "#334fb4"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header links",
+      "blocks": {
+        "link_1": {
+          "type": "_header-link-item",
+          "settings": {
+            "label": "Store Locator",
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15 10.5a3 3 0 11-6 0 3 3 0 016 0z\" /><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z\" /></svg>"
+          }
+        },
+        "link_2": {
+          "type": "_header-link-item",
+          "settings": {
+            "label": "Gift Cards",
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M21 7.5h-1.875a6 6 0 00-9.352-4.979A6 6 0 003.875 7.5H2.25C1.56 7.5 1 8.06 1 8.75v3.5c0 .69.56 1.25 1.25 1.25h1.125v6.5c0 .69.56 1.25 1.25 1.25h13.5c.69 0 1.25-.56 1.25-1.25v-6.5h1.125c.69 0 1.25-.56 1.25-1.25v-3.5c0-.69-.56-1.25-1.25-1.25zm-15-3A4.5 4.5 0 0110.5 7.5H6a4.5 4.5 0 010-3zm7.5 3a4.5 4.5 0 014.5-3 4.5 4.5 0 010 3h-4.5z\" /></svg>"
+          }
+        }
+      },
+      "block_order": [
+        "link_1",
+        "link_2"
+      ]
+    }
+  ]
+}
+{% endschema %}

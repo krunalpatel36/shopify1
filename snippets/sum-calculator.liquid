@@ -1,0 +1,127 @@
+{% comment %}
+  Reusable Liquid Sum Calculator Snippet
+  Usage:
+    {% render 'sum-calculator' %}
+    OR
+    {% render 'sum-calculator', num1: 25, num2: 75, title: 'My Quick Adder' %}
+{% endcomment %}
+
+{% liquid
+  assign val1 = num1 | default: 0
+  assign val2 = num2 | default: 0
+  assign initial_sum = val1 | plus: val2
+  assign unique_id = 'now' | date: '%N' | default: 'calc'
+%}
+
+<div class="snippet-sum-calculator" id="snippet-calc-{{ unique_id }}">
+  {% if title != blank %}
+    <h3 class="snippet-calc-title">{{ title }}</h3>
+  {% endif %}
+
+  <!-- Liquid server-side sum example -->
+  <div class="snippet-liquid-calc">
+    <small>Liquid Server Calculation: <code>&#123;% assign sum = {{ val1 }} | plus: {{ val2 }} %&#125;</code> = <strong>{{ initial_sum }}</strong></small>
+  </div>
+
+  <form class="snippet-calc-form" onsubmit="return false;">
+    <div class="snippet-calc-row">
+      <input type="number" class="snippet-calc-input num1" value="{{ val1 }}" placeholder="Value 1" step="any" required>
+      <span class="snippet-calc-plus">+</span>
+      <input type="number" class="snippet-calc-input num2" value="{{ val2 }}" placeholder="Value 2" step="any" required>
+      <button type="submit" class="snippet-calc-submit">Submit</button>
+    </div>
+  </form>
+
+  <div class="snippet-calc-output">
+    <span>Sum Result: </span>
+    <strong class="snippet-sum-display">{{ initial_sum }}</strong>
+  </div>
+</div>
+
+<style>
+  .snippet-sum-calculator {
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    max-width: 480px;
+    margin: 1rem 0;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    font-family: inherit;
+  }
+  .snippet-calc-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+  .snippet-liquid-calc {
+    margin-bottom: 0.75rem;
+    color: #4b5563;
+    font-size: 0.85rem;
+    background: #f9fafb;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+  }
+  .snippet-calc-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .snippet-calc-input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  .snippet-calc-plus {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #6b7280;
+  }
+  .snippet-calc-submit {
+    background: #111827;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.55rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .snippet-calc-submit:hover {
+    background: #374151;
+  }
+  .snippet-calc-output {
+    font-size: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f3f4f6;
+  }
+  .snippet-sum-display {
+    color: #2563eb;
+    font-size: 1.2rem;
+  }
+</style>
+
+<script>
+  (function() {
+    const container = document.getElementById('snippet-calc-{{ unique_id }}');
+    if (!container) return;
+
+    const form = container.querySelector('.snippet-calc-form');
+    const input1 = container.querySelector('.num1');
+    const input2 = container.querySelector('.num2');
+    const display = container.querySelector('.snippet-sum-display');
+
+    if (form && input1 && input2 && display) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const v1 = parseFloat(input1.value) || 0;
+        const v2 = parseFloat(input2.value) || 0;
+        const sum = Math.round((v1 + v2 + Number.EPSILON) * 10000) / 10000;
+        display.textContent = sum;
+      });
+    }
+  })();
+</script>
