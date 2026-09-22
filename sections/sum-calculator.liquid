@@ -1,0 +1,513 @@
+{% comment %}
+  Sum Calculator Section
+  Calculates the sum of two numbers using Liquid's 'plus' filter (server-side default)
+  and interactive client-side calculation upon form submission.
+{% endcomment %}
+
+{% liquid
+  assign num1_default = section.settings.default_num1 | default: 10
+  assign num2_default = section.settings.default_num2 | default: 20
+  assign liquid_server_sum = num1_default | plus: num2_default
+%}
+
+<div class="sum-calc-wrapper section-{{ section.id }}" style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="sum-calc-container">
+    <div class="sum-calc-card">
+      <div class="sum-calc-header">
+        <span class="sum-calc-badge">{{ section.settings.badge_text | default: 'Liquid Math' }}</span>
+        <h2 class="sum-calc-title">{{ section.settings.title | default: 'Sum Calculator' }}</h2>
+        <p class="sum-calc-subtitle">{{ section.settings.subtitle | default: 'Enter two numbers below and click submit to calculate their sum.' }}</p>
+      </div>
+
+      <!-- Server-rendered Liquid calculation demonstration -->
+      <div class="sum-calc-liquid-demo">
+        <div class="liquid-demo-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>Server-Side Liquid Calculation (plus filter):</span>
+        </div>
+        <code>
+          &#123;% assign sum = {{ num1_default }} | plus: {{ num2_default }} %&#125; &rarr; <strong>{{ liquid_server_sum }}</strong>
+        </code>
+      </div>
+
+      <!-- Interactive Calculator Form -->
+      <form class="sum-calc-form" id="sum-calc-form-{{ section.id }}" onsubmit="return false;">
+        <div class="sum-calc-grid">
+          <div class="sum-calc-field">
+            <label for="num1-{{ section.id }}" class="sum-calc-label">First Number</label>
+            <input
+              type="number"
+              id="num1-{{ section.id }}"
+              name="num1"
+              class="sum-calc-input"
+              value="{{ num1_default }}"
+              placeholder="e.g. 10"
+              step="any"
+              required
+            >
+          </div>
+
+          <div class="sum-calc-operator">
+            <span>+</span>
+          </div>
+
+          <div class="sum-calc-field">
+            <label for="num2-{{ section.id }}" class="sum-calc-label">Second Number</label>
+            <input
+              type="number"
+              id="num2-{{ section.id }}"
+              name="num2"
+              class="sum-calc-input"
+              value="{{ num2_default }}"
+              placeholder="e.g. 20"
+              step="any"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="sum-calc-actions">
+          <button type="submit" id="sum-submit-btn-{{ section.id }}" class="sum-calc-button">
+            <span>{{ section.settings.button_label | default: 'Calculate Sum' }}</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+          <button type="button" id="sum-reset-btn-{{ section.id }}" class="sum-calc-button-secondary">
+            Reset
+          </button>
+        </div>
+      </form>
+
+      <!-- Result Card Display -->
+      <div class="sum-calc-result" id="sum-result-box-{{ section.id }}">
+        <div class="result-label">Result:</div>
+        <div class="result-display">
+          <span class="result-expression" id="result-expression-{{ section.id }}">{{ num1_default }} + {{ num2_default }} =</span>
+          <span class="result-value" id="result-sum-{{ section.id }}">{{ liquid_server_sum }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .section-{{ section.id }} {
+    --calc-primary: {{ section.settings.primary_color | default: '#1f2937' }};
+    --calc-accent: {{ section.settings.accent_color | default: '#3b82f6' }};
+    --calc-accent-hover: {{ section.settings.accent_color_hover | default: '#2563eb' }};
+    --calc-card-bg: {{ section.settings.card_bg | default: '#ffffff' }};
+    --calc-text-color: {{ section.settings.text_color | default: '#111827' }};
+    --calc-border: {{ section.settings.border_color | default: '#e5e7eb' }};
+  }
+
+  .sum-calc-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    font-family: inherit;
+  }
+
+  .sum-calc-container {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    box-sizing: border-box;
+  }
+
+  .sum-calc-card {
+    background: var(--calc-card-bg);
+    border: 1px solid var(--calc-border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    color: var(--calc-text-color);
+  }
+
+  .sum-calc-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+
+  .sum-calc-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--calc-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 9999px;
+    margin-bottom: 0.75rem;
+  }
+
+  .sum-calc-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--calc-text-color);
+  }
+
+  .sum-calc-subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .sum-calc-liquid-demo {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  .liquid-demo-header {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+
+  .sum-calc-liquid-demo code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: #0f172a;
+  }
+
+  .sum-calc-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .sum-calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sum-calc-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--calc-text-color);
+  }
+
+  .sum-calc-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1.125rem;
+    border: 1.5px solid var(--calc-border);
+    border-radius: 8px;
+    background-color: #fff;
+    color: var(--calc-text-color);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .sum-calc-input:focus {
+    outline: none;
+    border-color: var(--calc-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+
+  .sum-calc-operator {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--calc-accent);
+    padding-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sum-calc-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .sum-calc-button {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--calc-accent);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sum-calc-button:hover {
+    background: var(--calc-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  }
+
+  .sum-calc-button-secondary {
+    padding: 0.875rem 1.25rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sum-calc-button-secondary:hover {
+    background: #e5e7eb;
+    color: #111827;
+  }
+
+  .sum-calc-result {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.04) 100%);
+    border: 1.5px dashed var(--calc-accent);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+  }
+
+  .result-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #4b5563;
+  }
+
+  .result-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .result-expression {
+    font-size: 1.125rem;
+    color: #6b7280;
+  }
+
+  .result-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--calc-accent);
+  }
+
+  @media (max-width: 600px) {
+    .sum-calc-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .sum-calc-operator {
+      padding-top: 0;
+      text-align: center;
+    }
+
+    .sum-calc-result {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    function initCalculator() {
+      const form = document.getElementById('sum-calc-form-{{ section.id }}');
+      const num1Input = document.getElementById('num1-{{ section.id }}');
+      const num2Input = document.getElementById('num2-{{ section.id }}');
+      const resetBtn = document.getElementById('sum-reset-btn-{{ section.id }}');
+      const resultExpression = document.getElementById('result-expression-{{ section.id }}');
+      const resultSum = document.getElementById('result-sum-{{ section.id }}');
+      const resultBox = document.getElementById('sum-result-box-{{ section.id }}');
+
+      if (!form || !num1Input || !num2Input || !resultSum) return;
+
+      function calculateSum() {
+        const val1 = parseFloat(num1Input.value);
+        const val2 = parseFloat(num2Input.value);
+
+        if (isNaN(val1) || isNaN(val2)) {
+          resultExpression.textContent = 'Please enter valid numbers';
+          resultSum.textContent = '';
+          return;
+        }
+
+        const sum = val1 + val2;
+        // Format to avoid floating point precision issues (e.g. 0.1 + 0.2 = 0.30000000000000004)
+        const formattedSum = Math.round((sum + Number.EPSILON) * 10000) / 10000;
+
+        resultExpression.textContent = `${val1} + ${val2} =`;
+        resultSum.textContent = formattedSum;
+
+        // Subtle animation feedback
+        resultBox.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+          resultBox.style.transform = 'scale(1)';
+        }, 150);
+      }
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        calculateSum();
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          num1Input.value = '';
+          num2Input.value = '';
+          resultExpression.textContent = '0 + 0 =';
+          resultSum.textContent = '0';
+          num1Input.focus();
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCalculator);
+    } else {
+      initCalculator();
+    }
+
+    // Support Shopify Theme Customizer changes
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.detail.sectionId === '{{ section.id }}') {
+        initCalculator();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Sum Calculator",
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "Liquid Math"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Sum Calculator"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subheading",
+      "default": "Enter two numbers below and click submit to calculate their sum."
+    },
+    {
+      "type": "number",
+      "id": "default_num1",
+      "label": "Default First Number",
+      "default": 10
+    },
+    {
+      "type": "number",
+      "id": "default_num2",
+      "label": "Default Second Number",
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "Calculate Sum"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#3b82f6"
+    },
+    {
+      "type": "color",
+      "id": "accent_color_hover",
+      "label": "Accent Hover Color",
+      "default": "#2563eb"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top Padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom Padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sum Calculator",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
